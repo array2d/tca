@@ -7,3 +7,18 @@ type TemplateTable struct {
 	Shell  string
 	Argf1  string
 }
+
+//var (
+//	templateTable string = "template"
+//)
+//
+//func init() {
+//	t := os.Getenv("TEMPLATE_TABLE")
+//	if t != "" {
+//		templateTable = t
+//		log.WithFields(
+//			log.Fields{
+//				"TEMPLATE_TABLE": t,
+//			}).Infoln("templateTable updated")
+//	}
+//}

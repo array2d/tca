@@ -30,18 +30,7 @@ func (k *kindHandler) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 			"id":     id,
 		}).Debugln("req")
 	var values map[string]any
-	var err error
-	err = json.NewDecoder(request.Body).Decode(&values)
-	if err != nil {
-		log.WithFields(
-			log.Fields{
-				"method": request.Method,
-				"kind":   kind,
-				"id":     id,
-				"decode": id,
-			}).Errorln()
-		return
-	}
+	json.NewDecoder(request.Body).Decode(&values)
 	code, stdouterr := k.tca.Method(kind, request.Method, id, values)
 	writer.WriteHeader(code)
 	writer.Write([]byte(stdouterr))

@@ -2,26 +2,11 @@ package tca
 
 import (
 	"errors"
+	"fmt"
 	"git.array2d.com/cncf/tca/pkg/db"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"os"
 )
-
-var (
-	templateTable string = "template"
-)
-
-func init() {
-	t := os.Getenv("TEMPLATE_TABLE")
-	if t != "" {
-		templateTable = t
-		log.WithFields(
-			log.Fields{
-				"TEMPLATE_TABLE": t,
-			}).Infoln("templateTable updated")
-	}
-}
 
 type Tca struct {
 	db *gorm.DB
@@ -44,7 +29,7 @@ func New() (t *Tca) {
 func (t *Tca) Method(kind, method, id string, values map[string]any) (code int, stdouterr string) {
 	var err error
 	var template TemplateTable
-	err = t.db.Table(templateTable).Where("kind = ? and method = ?", kind, method).Find(&template).Error
+	err = t.db.Model(&template).Where("kind = ? and method = ?", kind, method).Find(&template).Error
 	if err != nil {
 		log.WithFields(
 			log.Fields{
@@ -83,5 +68,5 @@ func (t *Tca) Method(kind, method, id string, values map[string]any) (code int, 
 		}
 	}
 
-	return
+	return 200, fmt.Sprint(template)
 }
