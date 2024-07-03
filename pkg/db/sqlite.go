@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func init() {
+func _sqlite() {
 	dbPath := os.Getenv("SQLITE_DB_PATH")
 	if dbPath != "" {
 		var err error

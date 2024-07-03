@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func init() {
+func _mysql() {
 	dsn := os.Getenv("MYSQL_DSN")
 	if dsn != "" {
 		var err error
@@ -20,5 +20,7 @@ func init() {
 			return
 		}
 		db = db.Debug()
+		log.Infoln("connect to mysql")
 	}
+	return
 }

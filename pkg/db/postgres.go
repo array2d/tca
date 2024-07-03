@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func init() {
+func _postgres() {
 	dsn := os.Getenv("POSTGRES_DSN")
 	if dsn != "" {
 		var err error

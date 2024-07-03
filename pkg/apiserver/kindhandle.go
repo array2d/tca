@@ -8,6 +8,13 @@ import (
 	"net/http"
 )
 
+func GetkindHandler() (kh *kindHandler) {
+	kh = &kindHandler{
+		tca: tca.New(),
+	}
+	return
+}
+
 type kindHandler struct {
 	tca *tca.Tca
 }

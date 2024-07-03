@@ -27,19 +27,22 @@ type Tca struct {
 	db *gorm.DB
 }
 
+func New() (t *Tca) {
+	t = &Tca{}
+	var err error
+	t.db, err = db.Getdb()
+	if err != nil {
+		log.WithFields(
+			log.Fields{
+				"err": err,
+			}).Fatalln("config error")
+		return nil
+	}
+	t.db.Migrator().AutoMigrate(new(TemplateTable))
+	return
+}
 func (t *Tca) Method(kind, method, id string, values map[string]any) (code int, stdouterr string) {
 	var err error
-	if t.db == nil {
-
-		t.db, err = db.Getdb()
-		if err != nil {
-			log.WithFields(
-				log.Fields{
-					"err": err,
-				}).Fatalln("config error")
-			return
-		}
-	}
 	var template TemplateTable
 	err = t.db.Table(templateTable).Where("kind = ? and method = ?", kind, method).Find(&template).Error
 	if err != nil {

@@ -7,7 +7,10 @@ import (
 
 var db *gorm.DB
 
-func Getdb() (db *gorm.DB, err error) {
+func Getdb() (d *gorm.DB, err error) {
+	_mysql()
+	_sqlite()
+	_postgres()
 	if db != nil {
 		return db, nil
 	}
