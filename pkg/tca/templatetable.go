@@ -4,6 +4,7 @@ import (
 	"git.array2d.com/cncf/tca/pkg"
 	"git.array2d.com/cncf/tca/pkg/render"
 	"git.array2d.com/cncf/tca/pkg/shell"
+	log "github.com/sirupsen/logrus"
 )
 
 type TemplateTable struct {
@@ -19,6 +20,7 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct, 
 	var sh string
 	sh, err = render.TextTemplate(tmpl.Shell, kinds, in)
 	var code int
+	log.Debugln(sh)
 	code, output, err = shell.BashC(sh)
 	if code == 0 {
 

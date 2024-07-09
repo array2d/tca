@@ -12,6 +12,7 @@ var apiserver = &cobra.Command{
 	Short: "apiserver for your control request",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.DebugLevel)
 		var addr string = ":4000"
 		if len(args) > 0 {
 			addr = args[0]
