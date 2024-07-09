@@ -35,16 +35,15 @@ shell，采用template模板渲染变量对象，输出最终的script
 sql,完成shell后需要执行的sql，同样采用template模板渲染变量对象
 ```
 
-```
 kind=tablea
+```
 id
 name
-createtime
-code
-stdouterr
-...其他业务字段
+ctime
+status
+...其他业务字段,
 ```
-（二）redis 信令系统
+（二）redis 信令系统（待设计）
 <!-- 负责传递消息指令
 负责定时任务队列
 
