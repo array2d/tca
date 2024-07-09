@@ -83,7 +83,8 @@ body={
 
 ### （一）管理多个juicefs文件系统
 
-例如，这是`template_tables`表的juicefs记录
+例如，这是`template_tables`表的juicefs记录,这里只展示了format方法，你完全可以配置destroy、status等其他方法的脚本
+
 ``` sql
 # id, kind, method, shell, sql
 '4', 'juicefs', 'FORMAT', 'juicefs format --storage s3 --bucket http://192.168.1.245:9000/{{.in.name}} --access-key minioadmin --secret-key minioadmin tikv://192.168.122.89:2379,192.169.122.207:2379,192.168.122.245:2379/{{.in.name}}  {{.in.name}} ', 'INSERT INTO juicefs ( name,ctime, size,status)  VALUES ( \'{{.in.name}}\', NOW(), 0,{{.out.code}})'
