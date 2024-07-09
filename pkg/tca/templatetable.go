@@ -16,11 +16,11 @@ type TemplateTable struct {
 }
 
 func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]AnyStruct, in map[string]any) (output string, err error) {
-	t := template.Must(template.New(tmpl.Kind).Parse(tmpl.Shell))
+	t, _ := template.New(tmpl.Kind).Parse(tmpl.Shell)
 	sh := bytes.Buffer{}
 	values := kinds
 	values["in"] = in
-	err = t.Execute(&sh, in)
+	err = t.Execute(&sh, values)
 	if err != nil {
 		return "", err
 	}
