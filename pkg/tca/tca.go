@@ -3,7 +3,9 @@ package tca
 import (
 	"errors"
 	"fmt"
+	"git.array2d.com/cncf/tca/pkg"
 	"git.array2d.com/cncf/tca/pkg/db"
+	"git.array2d.com/cncf/tca/pkg/render"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -38,7 +40,7 @@ func New() (t *Tca) {
 }
 
 func (t *Tca) TemplateTable(kind, method string) (template TemplateTable, err error) {
-	err = t.db.Model(&template).Where("kind = ? and method = ?", kind, method).Find(&template).Error
+	err = t.db.Model(&template).Where("kind = ? and method = ?", kind, method).First(&template).Error
 	if err != nil {
 		log.WithFields(
 			log.Fields{
@@ -50,10 +52,10 @@ func (t *Tca) TemplateTable(kind, method string) (template TemplateTable, err er
 	return
 }
 
-func (t *Tca) ComplateKinds(kindsid map[string]string) (kinds map[string]AnyStruct, err error) {
-	kinds = make(map[string]AnyStruct)
+func (t *Tca) ComplateKinds(kindsid map[string]string) (kinds map[string]pkg.AnyStruct, err error) {
+	kinds = make(map[string]pkg.AnyStruct)
 	for kind, id := range kindsid {
-		var a AnyStruct
+		var a pkg.AnyStruct
 		err = t.db.Table(kind).Table(" CAST(id AS CHAR)  = ?", id).Find(&a).Error
 		if err != nil {
 			log.WithFields(
@@ -68,7 +70,7 @@ func (t *Tca) ComplateKinds(kindsid map[string]string) (kinds map[string]AnyStru
 	return
 }
 
-func (t *Tca) Method(kind, method string, kindsid map[string]string, in AnyStruct) (code int, stdouterr string) {
+func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyStruct) (code int, stdouterr string) {
 	tmpl, err := t.TemplateTable(kind, method)
 	if err != nil {
 		return 500, err.Error()
@@ -79,6 +81,21 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in AnyStruc
 	}
 	var output string
 	output, err = tmpl.BuildAndRunShellArgf(kinds, in)
-	tmpl.BuildAndRunShellArgf(kinds, in)
+	if err != nil {
+		return 500, fmt.Sprint(output)
+	}
+	if tmpl.Sql != "" {
+		var sql string
+		sql, err = render.TextTemplate(tmpl.Sql, kinds, in)
+		err = t.db.Exec(sql).Error
+
+		if err != nil {
+			log.WithFields(
+				log.Fields{
+					"kind": kind,
+					"sql":  tmpl.Sql,
+				}).Errorln("sql execute failed")
+		}
+	}
 	return 200, fmt.Sprint(output)
 }

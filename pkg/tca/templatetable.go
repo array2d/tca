@@ -1,9 +1,9 @@
 package tca
 
 import (
-	"bytes"
+	"git.array2d.com/cncf/tca/pkg"
+	"git.array2d.com/cncf/tca/pkg/render"
 	"git.array2d.com/cncf/tca/pkg/shell"
-	"text/template"
 )
 
 type TemplateTable struct {
@@ -15,22 +15,13 @@ type TemplateTable struct {
 	Sql    string
 }
 
-func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]AnyStruct, in map[string]any) (output string, err error) {
-	t, _ := template.New(tmpl.Kind).Parse(tmpl.Shell)
-	sh := bytes.Buffer{}
-	values := kinds
-	values["in"] = in
-	err = t.Execute(&sh, values)
-	if err != nil {
-		return "", err
-	}
+func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct, in pkg.AnyStruct) (output string, err error) {
+	var sh string
+	sh, err = render.TextTemplate(tmpl.Shell, kinds, in)
 	var code int
-	code, output, err = shell.BashC(sh.String())
+	code, output, err = shell.BashC(sh)
 	if code == 0 {
 
 	}
-	return
-}
-func (tmpl *TemplateTable) BuildAndRunSql(kinds map[string]AnyStruct, in map[string]string) (output string, err error) {
 	return
 }

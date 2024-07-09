@@ -16,7 +16,7 @@ func New() (a *Apiserver) {
 	a = &Apiserver{
 		router: NewRouter(),
 	}
-	a.Route("/{kind}/{id}", GetkindHandler())
+	a.Route("/{kind}", GetkindHandler())
 	return
 }
 func (a *Apiserver) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
