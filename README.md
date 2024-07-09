@@ -14,10 +14,12 @@ k8s以及k8s依赖的资源创建，通常以2种方式创建
 
 
 ## 二.思路
-client-go创建k8s res，可以用kubectl apply 命令shell代替
-Juicefs format 是用shell完成
+在client-go创建k8s res这样的场景，我们发现完全可以用kubectl apply 命令shell代替
+Juicefs format 也是用shell完成
 
-我们的核心思路，是通过数据库定义的字段，执行shell。也就是table驱动shell。
+于是，为什么写那么多重复代码？而不设计一个通用引擎？
+
+所以，我们的核心思路，是通过数据库定义的字段，执行shell script。也就是table驱动shell。
 
 table更容易和上层业务结合，而tca就是通过shell，完成table期望的值。
 
@@ -67,7 +69,7 @@ body={
 }
 ```
 这里
-{kind}是核心类型，tca引擎根据{kind}和method，在template表,差找到最终的tempalte的目标脚本
+{kind}是核心类型，tca引擎根据{kind}和method，在template表,查找到最终的tempalte的目标脚本
 
 + 把http的body，作为内置变量in，提供给tca引擎，参与模板渲染
 
