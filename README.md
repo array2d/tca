@@ -110,6 +110,10 @@ id=4，记录了FORMAT juicefs的shell脚本和create juicefs的语句
 
 ```
 
+
+![juicefs format](doc/juicefs.jpg)
+
+
 ### (二)控制k8s
 通过调用kubectl，而不是写一堆啰嗦client-go代码，就可以用mysql表格的方式，管理k8s
 
