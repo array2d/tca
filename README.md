@@ -53,23 +53,30 @@ id
 返回消息
 查询并返回id -->
 
-### （二）tca-apiserver
-tca的apiserver
 
-接受外部http请求，按照这样的协议
+### （二）tca-apiserver
+tca的apiserver的执行流程
+
++ 接受外部http请求，按照这样的http协议
+```
 METHOD /{kind}?{kind}=123&kindb=234&kindc=456
 body={
   filed1=
   field2=
 ...
 }
+```
+这里
+{kind}是核心类型，tca引擎根据{kind}和method，在template表,差找到最终的tempalte的目标脚本
 
-把http的body，作为内置变量in，提供给tca引擎，参与模板渲染
++ 把http的body，作为内置变量in，提供给tca引擎，参与模板渲染
 
-根据kind+method，在template表,结合in这个内置变量，以及kinds对象的map，生成最终的script，并执行，产生out变量
+结合in这个内置变量，以及kinds对象的map，生成最终的script，并执行shell
 
-，写入到kind表的code和stdouterr
-返回code和stdouterr
++ shell执行结束，产生内置out变量{code,stdout}
++ 如果sql表不为空，则进一步模板渲染sql，这些in、out、kinds变量，都会参与渲染，并执行sql，这样可以灵活的实现{kind}表的各种处理
+
+
 ## tca的实际应用
 
 ### （一）简单的管理多个juicefs文件系统
