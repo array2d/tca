@@ -81,7 +81,7 @@ body={
 
 ## tca的实际应用
 
-### （一）简单的管理多个juicefs文件系统
+### （一）管理多个juicefs文件系统
 
 例如，这是`template_tables`表的juicefs记录
 ``` sql
