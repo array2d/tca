@@ -12,14 +12,12 @@ type TemplateTable struct {
 	Kind   string `gorm:"type:varchar(80)"`
 	Method string `gorm:"type:varchar(40)"`
 	Shell  string
-	Argf1  string
 	Sql    string
 }
 
-func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct, in pkg.AnyStruct) (output string, err error) {
+func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) (code int, output string, err error) {
 	var sh string
-	sh, err = render.TextTemplate(tmpl.Shell, kinds, in)
-	var code int
+	sh, err = render.TextTemplate(tmpl.Shell, kinds)
 	log.Debugln(sh)
 	code, output, err = shell.BashC(sh)
 	if code == 0 {

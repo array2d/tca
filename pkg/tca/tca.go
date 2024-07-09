@@ -79,14 +79,16 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyS
 	if err != nil {
 		return 500, err.Error()
 	}
-	var output string
-	output, err = tmpl.BuildAndRunShellArgf(kinds, in)
-	if err != nil {
-		return 500, fmt.Sprint(output)
+	kinds["in"] = in
+	var out = make(map[string]any)
+	out["code"], out["output"], out["err"] = tmpl.BuildAndRunShellArgf(kinds)
+	if out["err"] != nil {
+		return 500, fmt.Sprint(out["output"])
 	}
 	if tmpl.Sql != "" {
 		var sql string
-		sql, err = render.TextTemplate(tmpl.Sql, kinds, in)
+		kinds["out"] = out
+		sql, err = render.TextTemplate(tmpl.Sql, kinds)
 		err = t.db.Exec(sql).Error
 
 		if err != nil {
@@ -97,5 +99,5 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyS
 				}).Errorln("sql execute failed")
 		}
 	}
-	return 200, fmt.Sprint(output)
+	return 200, fmt.Sprint(out["output"])
 }
