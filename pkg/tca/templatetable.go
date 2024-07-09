@@ -19,7 +19,7 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) 
 	var sh string
 	sh, err = render.TextTemplate(tmpl.Shell, kinds)
 	log.Debugln(sh)
-	code, output, err = shell.BashC(sh)
+	code, output, err = shell.BashFile(sh)
 	if code == 0 {
 
 	}
