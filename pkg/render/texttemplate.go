@@ -7,7 +7,11 @@ import (
 )
 
 func TextTemplate(tmpl string, kinds map[string]pkg.AnyStruct, in pkg.AnyStruct) (txt string, err error) {
-	t, _ := template.New("").Parse(tmpl)
+	t := template.New("")
+	t, err = t.Parse(tmpl)
+	if err != nil {
+		return "", err
+	}
 	sh := bytes.Buffer{}
 	values := kinds
 	values["in"] = in
