@@ -7,7 +7,7 @@ import (
 )
 
 func BashFile(script string) (exitCode int, stdouterr string, err error) {
-	tmpFile, err := os.CreateTemp("", "script-*.sh")
+	tmpFile, err := os.CreateTemp("", "tca-sh-*.sh")
 	if err != nil {
 		log.WithError(err).Errorln("create tmp failed")
 	}
@@ -23,9 +23,7 @@ func BashFile(script string) (exitCode int, stdouterr string, err error) {
 	if err = os.Chmod(tmpFile.Name(), 0755); err != nil {
 		log.WithError(err).Errorln("tmp failed")
 	}
-
 	// 执行脚本
-
 	return ShellResult([]string{"/bin/bash", tmpFile.Name()}, nil)
 }
 func BashC(sh string) (exitCode int, stdouterr string, err error) {

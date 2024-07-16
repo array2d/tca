@@ -1,6 +1,7 @@
 package tca
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"git.array2d.com/cncf/tca/pkg"
@@ -31,7 +32,7 @@ func New() (t *Tca) {
 	}
 	err = t.db.Migrator().AutoMigrate(models...)
 	if err != nil {
-		log.WithFields(
+		log.WithError(err).WithFields(
 			log.Fields{
 				"err": err,
 			}).Fatalln("migrate error")
@@ -42,7 +43,7 @@ func New() (t *Tca) {
 func (t *Tca) TemplateTable(kind, method string) (template TemplateTable, err error) {
 	err = t.db.Model(&template).Where("kind = ? and method = ?", kind, method).First(&template).Error
 	if err != nil {
-		log.WithFields(
+		log.WithError(err).WithFields(
 			log.Fields{
 				"kind":   kind,
 				"method": method,
@@ -55,17 +56,19 @@ func (t *Tca) TemplateTable(kind, method string) (template TemplateTable, err er
 func (t *Tca) ComplateKinds(kindsid map[string]string) (kinds map[string]pkg.AnyStruct, err error) {
 	kinds = make(map[string]pkg.AnyStruct)
 	for kind, id := range kindsid {
-		var a pkg.AnyStruct
-		err = t.db.Table(kind).Table(" CAST(id AS CHAR)  = ?", id).Find(&a).Error
+		var as []map[string]interface{}
+		err = t.db.Table(kind).Where("CAST(id AS CHAR)  = ?", id).Find(&as).Error
 		if err != nil {
-			log.WithFields(
+			log.WithError(err).WithFields(
 				log.Fields{
 					"kind": kind,
 					"id":   id,
 				}).Errorln("kindsid not found")
 			return
 		}
-		kinds[kind] = a
+		if len(as) == 1 {
+			kinds[kind] = as[0]
+		}
 	}
 	return
 }
@@ -88,11 +91,23 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyS
 	if tmpl.Sql != "" {
 		var sql string
 		kinds["out"] = out
+		var jsonout pkg.AnyStruct
+		jsonerr := json.Unmarshal([]byte(out["output"].(string)), &jsonout)
+		if jsonerr == nil {
+			out["output"] = jsonout
+		}
 		sql, err = render.TextTemplate(tmpl.Sql, kinds)
-		err = t.db.Exec(sql).Error
-
 		if err != nil {
-			log.WithFields(
+			log.WithError(err).WithFields(
+				log.Fields{
+					"kind": kind,
+					"sql":  tmpl.Sql,
+				}).Errorln("sql template failed")
+		}
+		log.Debugln(sql)
+		err = t.db.Exec(sql).Error
+		if err != nil {
+			log.WithError(err).WithFields(
 				log.Fields{
 					"kind": kind,
 					"sql":  tmpl.Sql,
