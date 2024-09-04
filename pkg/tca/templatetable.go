@@ -7,7 +7,6 @@ import (
 	"git.array2d.com/cncf/tca/pkg/shell"
 	log "github.com/sirupsen/logrus"
 	"os"
-	"path/filepath"
 )
 
 type TemplateTable struct {
@@ -30,6 +29,9 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) 
 		}
 	}()
 
+	shDir := "/var/tmp/tca"
+	shDir += string(os.PathSeparator) + tmpl.Kind
+	os.MkdirAll(shDir, os.ModePerm)
 	if tmpl.File1 != "" {
 		files = append(files, &os.File{})
 		fileTexts = append(fileTexts, "")
@@ -39,16 +41,14 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) 
 			return 500, "", err
 		}
 		// 获取系统的临时目录路径
-		tempDir := os.TempDir()
 
 		// 构建临时文件的前缀，使用 fmt.Sprintf 将 kind 和 method 拼接
-		prefix := fmt.Sprintf("tca-argf-%s-%s-", tmpl.Kind, tmpl.Method)
+		argfname := fmt.Sprintf("%s.arg", tmpl.Method)
 
 		// 使用 os.CreateTemp 创建临时文件
-		os.Remove(filepath.Join(tempDir, prefix))
-		files[0], err = os.CreateTemp(tempDir, prefix)
+		files[0], err = os.Create(shDir + string(os.PathSeparator) + argfname)
 		if err != nil {
-			log.Println("Failed to create temp file:", err)
+			log.Println("Failed to create arg file:", err)
 			return 500, "", err
 		}
 		if _, err = files[0].Write([]byte(fileTexts[0])); err != nil {
@@ -61,7 +61,14 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) 
 	var sh string
 	sh, err = render.TextTemplate(tmpl.Shell, kinds)
 	log.Debugln(sh)
-	code, output, err = shell.BashFile(sh)
+
+	var shfile *os.File
+	shpath := shDir + string(os.PathSeparator) + fmt.Sprintf("%s.sh", tmpl.Method)
+	shfile, err = os.Create(shpath)
+	if _, err = shfile.Write([]byte(sh)); err != nil {
+		log.WithError(err).Errorln("write tmp failed")
+	}
+	code, output, err = shell.BashFile(shpath)
 	if code == 0 {
 
 	}

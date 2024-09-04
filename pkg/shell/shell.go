@@ -6,18 +6,11 @@ import (
 	"os/exec"
 )
 
-func BashFile(script string) (exitCode int, stdouterr string, err error) {
-	tmpFile, err := os.CreateTemp("", "tca-sh-*.sh")
+func BashFile(shfile string) (exitCode int, stdouterr string, err error) {
+	tmpFile, err := os.Open(shfile)
 	if err != nil {
-		log.WithError(err).Errorln("create tmp failed")
-	}
-	defer os.Remove(tmpFile.Name()) // 程序退出时删除临时文件
-
-	if _, err = tmpFile.Write([]byte(script)); err != nil {
-		log.WithError(err).Errorln("write tmp failed")
-	}
-	if err = tmpFile.Close(); err != nil {
 		log.WithError(err).Errorln("tmp failed")
+		return 500, "", err
 	}
 	// 为临时文件添加执行权限
 	if err = os.Chmod(tmpFile.Name(), 0755); err != nil {
