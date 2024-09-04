@@ -43,7 +43,7 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) 
 		// 获取系统的临时目录路径
 
 		// 构建临时文件的前缀，使用 fmt.Sprintf 将 kind 和 method 拼接
-		argfname := fmt.Sprintf("%s.arg", tmpl.Method)
+		argfname := fmt.Sprintf("%s.file1", tmpl.Method)
 
 		// 使用 os.CreateTemp 创建临时文件
 		files[0], err = os.Create(shDir + string(os.PathSeparator) + argfname)
