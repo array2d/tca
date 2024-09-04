@@ -1,11 +1,13 @@
 package tca
 
 import (
+	"fmt"
 	"git.array2d.com/cncf/tca/pkg"
 	"git.array2d.com/cncf/tca/pkg/render"
 	"git.array2d.com/cncf/tca/pkg/shell"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"path/filepath"
 )
 
 type TemplateTable struct {
@@ -36,12 +38,19 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) 
 			log.WithError(err).Errorln("render argf- failed")
 			return 500, "", err
 		}
-		files[0], err = os.Create("/tmp/tca-argf-" + tmpl.Kind + "-" + tmpl.Method + "-0")
+		// 获取系统的临时目录路径
+		tempDir := os.TempDir()
+
+		// 构建临时文件的前缀，使用 fmt.Sprintf 将 kind 和 method 拼接
+		prefix := fmt.Sprintf("tca-argf-%s-%s-", tmpl.Kind, tmpl.Method)
+
+		// 使用 os.CreateTemp 创建临时文件
+		os.Remove(filepath.Join(tempDir, prefix))
+		files[0], err = os.CreateTemp(tempDir, prefix)
 		if err != nil {
-			log.WithError(err).Errorln("create argf- failed")
+			log.Println("Failed to create temp file:", err)
 			return 500, "", err
 		}
-
 		if _, err = files[0].Write([]byte(fileTexts[0])); err != nil {
 			log.WithError(err).Errorln("write argf- failed")
 			return 500, "", err
