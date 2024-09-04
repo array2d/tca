@@ -35,6 +35,7 @@ kind，对应tablename
 method，生命周期的操作类型，创建、删除、更新、启动等
 shell，采用template模板渲染变量对象，输出最终的script
 sql,完成shell后需要执行的sql，同样采用template模板渲染变量对象
+file1,参数文件1,路径为/var/tmp/tca/{kind}/{method}.file1
 ```
 
 kind=tablea
