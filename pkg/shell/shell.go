@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"bytes"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
@@ -28,11 +29,13 @@ func ShellStd(cmds, envs []string) (exitCode int, stdouterr string, err error) {
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	// 设置环境变量
 	cmd.Env = envs
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	// 获取命令输出
+	var buf bytes.Buffer
+	cmd.Stdout = &buf
+	cmd.Stderr = &buf
 	err = cmd.Run()
 	exitCode = cmd.ProcessState.ExitCode()
+	stdouterr = buf.String()
 	return
 }
 
@@ -43,6 +46,11 @@ func ShellResult(cmds, envs []string) (exitCode int, stdouterr string, err error
 	// 获取命令输出
 	var std []byte
 	std, err = cmd.CombinedOutput()
+	if err != nil {
+		exitCode = -1
+		stdouterr = string(std)
+		return
+	}
 	exitCode = cmd.ProcessState.ExitCode()
 	stdouterr = string(std)
 	return
