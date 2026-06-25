@@ -7,8 +7,6 @@ import (
 )
 
 type Apiserver struct {
-	Addr   string
-	Prefix string
 	router *mux.Router
 }
 
@@ -23,7 +21,7 @@ func (a *Apiserver) ServeHTTP(writer http.ResponseWriter, request *http.Request)
 	a.router.ServeHTTP(writer, request)
 }
 func (a *Apiserver) Route(path string, handler http.Handler) (err error) {
-	err = a.router.PathPrefix(a.Prefix).Path(path).Handler(handler).GetError()
+	err = a.router.Path(path).Handler(handler).GetError()
 	if err != nil {
 		log.WithFields(
 			log.Fields{
