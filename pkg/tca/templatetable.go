@@ -33,34 +33,27 @@ func (tmpl *TemplateTable) BuildAndRunShellArgf(kinds map[string]pkg.AnyStruct) 
 	shDir += string(os.PathSeparator) + tmpl.Kind
 	os.MkdirAll(shDir, os.ModePerm)
 	if tmpl.File1 != "" {
-		files = append(files, &os.File{})
-		fileTexts = append(fileTexts, "")
-		fileTexts[0], err = render.TextTemplate(tmpl.File1, kinds)
+		fileText, err := render.TextTemplate(tmpl.File1, kinds)
 		if err != nil {
 			log.WithError(err).Errorln("render argf- failed")
 			return 500, "", err
 		}
-		// 获取系统的临时目录路径
-
-		// 构建临时文件的前缀，使用 fmt.Sprintf 将 kind 和 method 拼接
 		argfname := fmt.Sprintf("%s.file1", tmpl.Method)
-
-		// 使用 os.CreateTemp 创建临时文件
-		files[0], err = os.Create(shDir + string(os.PathSeparator) + argfname)
+		f, err := os.Create(shDir + string(os.PathSeparator) + argfname)
 		if err != nil {
 			log.Println("Failed to create arg file:", err)
 			return 500, "", err
 		}
-		if _, err = files[0].Write([]byte(fileTexts[0])); err != nil {
+		if _, err = f.Write([]byte(fileText)); err != nil {
 			log.WithError(err).Errorln("write argf- failed")
 			return 500, "", err
 		}
-
+		files = append(files, f)
+		fileTexts = append(fileTexts, fileText)
 	}
 
 	var sh string
 	sh, err = render.TextTemplate(tmpl.Shell, kinds)
-	log.Debugln(sh)
 
 	var shfile *os.File
 	shpath := shDir + string(os.PathSeparator) + fmt.Sprintf("%s.sh", tmpl.Method)

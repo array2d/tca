@@ -53,7 +53,7 @@ func (t *Tca) TemplateTable(kind, method string) (template TemplateTable, err er
 	return
 }
 
-func (t *Tca) ComplateKinds(kindsid map[string]string) (kinds map[string]pkg.AnyStruct, err error) {
+func (t *Tca) CompleteKinds(kindsid map[string]string) (kinds map[string]pkg.AnyStruct, err error) {
 	kinds = make(map[string]pkg.AnyStruct)
 	for kind, id := range kindsid {
 		var as []map[string]interface{}
@@ -78,7 +78,7 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyS
 	if err != nil {
 		return 500, err.Error()
 	}
-	kinds, err := t.ComplateKinds(kindsid)
+	kinds, err := t.CompleteKinds(kindsid)
 	if err != nil {
 		return 500, err.Error()
 	}
@@ -95,6 +95,8 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyS
 		jsonerr := json.Unmarshal([]byte(out["output"].(string)), &jsonout)
 		if jsonerr == nil {
 			out["output"] = jsonout
+		} else {
+			log.WithError(jsonerr).Errorln("json unmarshal output failed")
 		}
 		sql, err = render.TextTemplate(tmpl.Sql, kinds)
 		if err != nil {
@@ -103,6 +105,7 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyS
 					"kind": kind,
 					"sql":  tmpl.Sql,
 				}).Errorln("sql template failed")
+			return 500, err.Error()
 		}
 		log.Debugln(sql)
 		err = t.db.Exec(sql).Error
@@ -112,6 +115,7 @@ func (t *Tca) Method(kind, method string, kindsid map[string]string, in pkg.AnyS
 					"kind": kind,
 					"sql":  tmpl.Sql,
 				}).Errorln("sql execute failed")
+			return 500, err.Error()
 		}
 	}
 	return 200, fmt.Sprint(out["output"])
