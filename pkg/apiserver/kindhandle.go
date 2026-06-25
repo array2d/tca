@@ -39,6 +39,7 @@ func (kh *kindHandler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 	var values map[string]any
 	json.NewDecoder(request.Body).Decode(&values)
 	code, stdouterr := kh.tca.Method(mainKind, request.Method, kindids, values)
+	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(code)
 	writer.Write([]byte(stdouterr))
 }
